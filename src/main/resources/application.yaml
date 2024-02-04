@@ -1,0 +1,28 @@
+server:
+  port: 8081
+
+#keycloak-url: "http://nuc:8080"
+keycloak-url: "http://localhost:8080"
+
+spring:
+  docker:
+    compose:
+      enabled: true
+      file: docker-compose.yaml
+  security:
+    oauth2:
+      client:
+        registration:
+          secret:
+            client-id: "my-client"
+            client-secret: "secret"
+            authorization-grant-type: client_credentials
+          jwt:
+            client-id: "my-jwt-client"
+            client-authentication-method: private_key_jwt
+            authorization-grant-type: client_credentials
+        provider:
+          secret:
+            token-uri: "${keycloak-url}/realms/my-realm/protocol/openid-connect/token"
+          jwt:
+            token-uri: "${keycloak-url}/realms/my-realm/protocol/openid-connect/token"

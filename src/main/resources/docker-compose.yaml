@@ -1,0 +1,24 @@
+version: '3.8'
+services:
+  keycloak:
+    image: quay.io/keycloak/keycloak:23.0.4
+    container_name: keycloak-restclient
+    environment:
+      KEYCLOAK_ADMIN:  admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+
+    restart: unless-stopped
+
+    entrypoint: /opt/keycloak/bin/kc.sh start-dev --import-realm # --log-level=debug
+    ports:
+      - "8080:8080"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - keycloak-network
+    volumes:
+      - "./realm-import:/opt/keycloak/data/import"
+
+networks:
+  keycloak-network:
+    driver: bridge
