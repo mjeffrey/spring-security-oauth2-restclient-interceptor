@@ -18,6 +18,7 @@ package com.example.springsecurityrestclient;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.client.ClientHttpRequestInitializer;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientProvider;
@@ -43,13 +44,16 @@ public class ClientConfig {
         return builder.requestInterceptor(interceptor).build();
     }
 
+    /**
+     * This uses requestInitializer (just as a demonstration - we could use interceptor as well)
+     */
     @Bean
     RestClient restClientJwt(RestClient.Builder builder,
                           OAuth2AuthorizedClientManager authorizedClientManager,
                           ClientRegistrationRepository clientRegistrationRepository) {
         ClientRegistration clientRegistration = clientRegistrationRepository.findByRegistrationId("jwt");
-        ClientHttpRequestInterceptor interceptor = new OAuth2ClientInterceptor(authorizedClientManager, clientRegistration);
-        return builder.requestInterceptor(interceptor).build();
+        ClientHttpRequestInitializer initializer = new OAuth2ClientInterceptor(authorizedClientManager, clientRegistration);
+        return builder.requestInitializer(initializer).build();
     }
 
 
