@@ -10,8 +10,6 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
 
 @RestController
 @Slf4j
@@ -20,25 +18,11 @@ public class TestController {
 
     private static final String TARGET = "http://localhost:8081/target";
 
-    private WebClient webClientPassword;
-    private WebClient webClientJwt;
-
     private RestClient restClientPassword;
     private RestClient restClientJwt;
 
     private RestTemplate restTemplatePassword;
     private RestTemplate restTemplateJwt;
-    @GetMapping("/webClientPassword")
-    public Mono<String> webClientPassword() {
-        log.info("webClientPassword called");
-        return webClientPassword.get().uri(TARGET).retrieve().bodyToMono(String.class);
-    }
-
-    @GetMapping("/webClientJwt")
-    public Mono<String> webClientJwt() {
-        log.info("webClientJwt called");
-        return webClientJwt.get().uri(TARGET).retrieve().bodyToMono(String.class);
-    }
 
     @GetMapping("/restClientPassword")
     public String restClientPassword() {

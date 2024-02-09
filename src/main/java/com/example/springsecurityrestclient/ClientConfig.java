@@ -28,38 +28,11 @@ import org.springframework.security.oauth2.client.registration.ClientRegistratio
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.oauth2.client.web.DefaultOAuth2AuthorizedClientManager;
 import org.springframework.security.oauth2.client.web.OAuth2AuthorizedClientRepository;
-import org.springframework.security.oauth2.client.web.reactive.function.client.ServletOAuth2AuthorizedClientExchangeFilterFunction;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.reactive.function.client.WebClient;
 
 @Configuration
 public class ClientConfig {
-
-    @Bean
-    public WebClient webClientPassword(OAuth2AuthorizedClientManager authorizedClientManager) {
-        ServletOAuth2AuthorizedClientExchangeFilterFunction oauth2 = configureFilter(authorizedClientManager, "secret");
-        WebClient webClient = WebClient.builder()
-                .apply(oauth2.oauth2Configuration())
-                .build();
-        return webClient;
-    }
-
-    @Bean
-    public WebClient webClientJwt(OAuth2AuthorizedClientManager authorizedClientManager) {
-        ServletOAuth2AuthorizedClientExchangeFilterFunction oauth2 = configureFilter(authorizedClientManager, "jwt");
-        WebClient webClient = WebClient.builder()
-                .apply(oauth2.oauth2Configuration())
-                .build();
-        return webClient;
-    }
-
-    private ServletOAuth2AuthorizedClientExchangeFilterFunction configureFilter(OAuth2AuthorizedClientManager authorizedClientManager, String registrationId) {
-        ServletOAuth2AuthorizedClientExchangeFilterFunction oauth2 = new ServletOAuth2AuthorizedClientExchangeFilterFunction(authorizedClientManager);
-        oauth2.setDefaultOAuth2AuthorizedClient(true);
-        oauth2.setDefaultClientRegistrationId(registrationId);
-        return oauth2;
-    }
 
     @Bean
     RestClient restClientPassword(RestClient.Builder builder,
