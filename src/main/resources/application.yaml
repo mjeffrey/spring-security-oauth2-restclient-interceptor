@@ -13,16 +13,16 @@ spring:
     oauth2:
       client:
         registration:
-          secret:
+          my-secret-client:
             client-id: "my-client"
             client-secret: "secret"
             authorization-grant-type: client_credentials
-          jwt:
+          my-jwt-client:
             client-id: "my-jwt-client"
             client-authentication-method: private_key_jwt
             authorization-grant-type: client_credentials
         provider:
-          secret:
+          my-secret-client:
             token-uri: "${keycloak-url}/realms/my-realm/protocol/openid-connect/token"
-          jwt:
+          my-jwt-client:
             token-uri: "${keycloak-url}/realms/my-realm/protocol/openid-connect/token"

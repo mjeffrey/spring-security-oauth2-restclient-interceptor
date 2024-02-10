@@ -35,45 +35,64 @@ import org.springframework.web.client.RestTemplate;
 @Configuration
 public class ClientConfig {
 
+    /**
+     * {@link  RestClient} with {@link  ClientHttpRequestInterceptor}
+     */
     @Bean
     RestClient restClientPassword(RestClient.Builder builder,
-                          OAuth2AuthorizedClientManager authorizedClientManager,
-                          ClientRegistrationRepository clientRegistrationRepository) {
-        ClientRegistration clientRegistration = clientRegistrationRepository.findByRegistrationId("secret");
+                                  OAuth2AuthorizedClientManager authorizedClientManager,
+                                  ClientRegistrationRepository clientRegistrationRepository) {
+        ClientRegistration clientRegistration = clientRegistrationRepository.findByRegistrationId("my-secret-client");
+
         ClientHttpRequestInterceptor interceptor = new OAuth2ClientInterceptor(authorizedClientManager, clientRegistration);
         return builder.requestInterceptor(interceptor).build();
     }
 
     /**
-     * This uses requestInitializer (just as a demonstration - we could use interceptor as well)
+     * {@link  RestClient} with {@link  ClientHttpRequestInitializer}
      */
     @Bean
     RestClient restClientJwt(RestClient.Builder builder,
-                          OAuth2AuthorizedClientManager authorizedClientManager,
-                          ClientRegistrationRepository clientRegistrationRepository) {
-        ClientRegistration clientRegistration = clientRegistrationRepository.findByRegistrationId("jwt");
+                             OAuth2AuthorizedClientManager authorizedClientManager,
+                             ClientRegistrationRepository clientRegistrationRepository) {
+        ClientRegistration clientRegistration = clientRegistrationRepository.findByRegistrationId("my-jwt-client");
+
         ClientHttpRequestInitializer initializer = new OAuth2ClientInterceptor(authorizedClientManager, clientRegistration);
         return builder.requestInitializer(initializer).build();
     }
 
 
+    /**
+     * {@link  RestTemplate} with {@link  ClientHttpRequestInitializer}
+     * <p>
+     * Note that this needs to be added after construction.
+     */
     @Bean
-    public RestTemplate restTemplatePassword(RestTemplateBuilder restTemplateBuilder,
-                                             OAuth2AuthorizedClientManager authorizedClientManager,
-                                             ClientRegistrationRepository clientRegistrationRepository) {
-        ClientRegistration clientRegistration = clientRegistrationRepository.findByRegistrationId("secret");
-        return restTemplateBuilder
-                .additionalInterceptors(new OAuth2ClientInterceptor(authorizedClientManager, clientRegistration))
-                .build();
+    RestTemplate restTemplatePassword(RestTemplateBuilder restTemplateBuilder,
+                                      OAuth2AuthorizedClientManager authorizedClientManager,
+                                      ClientRegistrationRepository clientRegistrationRepository) {
+        ClientRegistration clientRegistration = clientRegistrationRepository.findByRegistrationId("my-secret-client");
+
+        ClientHttpRequestInitializer initializer = new OAuth2ClientInterceptor(authorizedClientManager, clientRegistration);
+
+        RestTemplate restTemplate = restTemplateBuilder.build();  // Need to build it then add the initializer (not supported by RestTemplateBuilder)
+        restTemplate.getClientHttpRequestInitializers().add(initializer);
+        return restTemplate;
     }
 
+    /**
+     * {@link  RestTemplate} with {@link  ClientHttpRequestInterceptor}.
+     */
     @Bean
-    public RestTemplate restTemplateJwt(RestTemplateBuilder restTemplateBuilder,
-                                        OAuth2AuthorizedClientManager authorizedClientManager,
-                                        ClientRegistrationRepository clientRegistrationRepository) {
-        ClientRegistration clientRegistration = clientRegistrationRepository.findByRegistrationId("jwt");
+    RestTemplate restTemplateJwt(RestTemplateBuilder restTemplateBuilder,
+                                 OAuth2AuthorizedClientManager authorizedClientManager,
+                                 ClientRegistrationRepository clientRegistrationRepository) {
+        ClientRegistration clientRegistration = clientRegistrationRepository.findByRegistrationId("my-jwt-client");
+
+        ClientHttpRequestInterceptor interceptor = new OAuth2ClientInterceptor(authorizedClientManager, clientRegistration);
         return restTemplateBuilder
-                .additionalInterceptors(new OAuth2ClientInterceptor(authorizedClientManager, clientRegistration))
+                .requestCustomizers()
+                .additionalInterceptors(interceptor)
                 .build();
     }
 
@@ -85,7 +104,6 @@ public class ClientConfig {
 
         OAuth2AuthorizedClientProvider authorizedClientProvider =
                 OAuth2AuthorizedClientProviderBuilder.builder()
-//						.authorizationCode()
                         .clientCredentials(clientCredentials ->
                                 clientCredentials.accessTokenResponseClient(responseClient))
                         .build();
@@ -94,10 +112,5 @@ public class ClientConfig {
         clientManager.setAuthorizedClientProvider(authorizedClientProvider);
         return clientManager;
     }
-
-//    @Bean
-//    public OAuth2AuthorizedClientService authorizedClientService(ClientRegistrationRepository clientRegistrationRepository) {
-//        return new InMemoryOAuth2AuthorizedClientService(clientRegistrationRepository);
-//    }
 
 }
