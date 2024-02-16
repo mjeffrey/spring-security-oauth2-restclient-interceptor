@@ -20,15 +20,15 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.client.ClientHttpRequestInitializer;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
+import org.springframework.security.oauth2.client.AuthorizedClientServiceOAuth2AuthorizedClientManager;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientProvider;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientProviderBuilder;
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
 import org.springframework.security.oauth2.client.endpoint.OAuth2AccessTokenResponseClient;
 import org.springframework.security.oauth2.client.endpoint.OAuth2ClientCredentialsGrantRequest;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
-import org.springframework.security.oauth2.client.web.DefaultOAuth2AuthorizedClientManager;
-import org.springframework.security.oauth2.client.web.OAuth2AuthorizedClientRepository;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestTemplate;
 
@@ -91,24 +91,25 @@ public class ClientConfig {
 
         ClientHttpRequestInterceptor interceptor = new OAuth2ClientInterceptor(authorizedClientManager, clientRegistration);
         return restTemplateBuilder
-                .requestCustomizers()
-                .additionalInterceptors(interceptor)
-                .build();
+            .requestCustomizers()
+            .additionalInterceptors(interceptor)
+            .build();
     }
 
     @Bean
     OAuth2AuthorizedClientManager authorizedClientManager(
-            OAuth2AccessTokenResponseClient<OAuth2ClientCredentialsGrantRequest> responseClient,
-            ClientRegistrationRepository clientRegistrationRepository,
-            OAuth2AuthorizedClientRepository authorizedClientRepository) {
+        OAuth2AccessTokenResponseClient<OAuth2ClientCredentialsGrantRequest> responseClient,
+        ClientRegistrationRepository clientRegistrationRepository,
+        OAuth2AuthorizedClientService clientService) {
 
         OAuth2AuthorizedClientProvider authorizedClientProvider =
-                OAuth2AuthorizedClientProviderBuilder.builder()
-                        .clientCredentials(clientCredentials ->
-                                clientCredentials.accessTokenResponseClient(responseClient))
-                        .build();
+            OAuth2AuthorizedClientProviderBuilder.builder()
+                .clientCredentials(clientCredentials ->
+                    clientCredentials.accessTokenResponseClient(responseClient))
+                .build();
 
-        DefaultOAuth2AuthorizedClientManager clientManager = new DefaultOAuth2AuthorizedClientManager(clientRegistrationRepository, authorizedClientRepository);
+        AuthorizedClientServiceOAuth2AuthorizedClientManager clientManager =
+            new AuthorizedClientServiceOAuth2AuthorizedClientManager(clientRegistrationRepository, clientService);
         clientManager.setAuthorizedClientProvider(authorizedClientProvider);
         return clientManager;
     }
