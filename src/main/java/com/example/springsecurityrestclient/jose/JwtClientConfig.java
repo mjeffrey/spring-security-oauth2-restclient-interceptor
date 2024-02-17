@@ -45,23 +45,4 @@ public class JwtClientConfig {
         return jwkSet != null ? jwkSet.getKeys().iterator().next() : null;
     }
 
-    @Bean
-    OAuth2AccessTokenResponseClient<OAuth2ClientCredentialsGrantRequest> clientCredentialsTokenResponseClient(
-            Function<ClientRegistration, JWK> jwkResolver) {
-
-        OAuth2ClientCredentialsGrantRequestEntityConverter clientCredentialsGrantRequestEntityConverter = new OAuth2ClientCredentialsGrantRequestEntityConverter();
-        clientCredentialsGrantRequestEntityConverter.addParametersConverter(new NimbusJwtClientAuthenticationParametersConverter<>(jwkResolver));
-
-        clientCredentialsGrantRequestEntityConverter.addParametersConverter(authorizationGrantRequest -> {
-            MultiValueMap<String, String> parameters = new LinkedMultiValueMap<>();
-            parameters.add(OAuth2ParameterNames.CLIENT_ID, authorizationGrantRequest.getClientRegistration().getClientId());
-            return parameters;
-        });
-
-        DefaultClientCredentialsTokenResponseClient clientCredentialsTokenResponseClient = new DefaultClientCredentialsTokenResponseClient();
-        clientCredentialsTokenResponseClient.setRequestEntityConverter(clientCredentialsGrantRequestEntityConverter);
-
-        return clientCredentialsTokenResponseClient;
-    }
-
 }

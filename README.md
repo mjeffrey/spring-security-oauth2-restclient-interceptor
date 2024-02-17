@@ -52,6 +52,4 @@ curl http://localhost:8081/webClientPassword
 curl http://localhost:8081/webClientJwt
 curl http://localhost:8081/restClientPassword
 curl http://localhost:8081/restClientJwt
-curl http://localhost:8081/webClientPassword
-curl http://localhost:8081/webClientJwt
 ```
